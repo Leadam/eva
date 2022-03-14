@@ -14,10 +14,38 @@ namespace eva {
     class Image {
     public:
         using PixelFormat = PIXEL_FORMAT;
+        using PlaneArray = typename PixelFormat::PlaneArray;
+        using LinestepArray = std::array<std::size_t, PixelFormat::plane_number>;
+        using Pixel = typename PixelFormat::Struct;
+        using Cursor = typename PixelFormat::Cursor;
 
+    private:
+        /***
+         * Plane array generator helper function
+         * @param width
+         * @param height
+         * @return
+         */
+        inline
+        static PlaneArray _make_planes(std::size_t width, std::size_t height){
+            return PixelFormat::template make_planes<Blob>(width, height);
+        }
+
+        /***
+         * Line step array generator helper function
+         * @param width
+         * @param height
+         * @return
+         */
+        inline
+        static LinestepArray _make_linesteps(std::size_t width, std::size_t height){
+            return PixelFormat::make_linesteps(width, height);
+        }
+
+    public:
         Image(std::size_t width, std::size_t height) :
-                _planes(PixelFormat::template make_planes<Blob>(width, height)),
-                _linesteps(PixelFormat::make_linesteps(width, height)),
+                _planes(_make_planes(width, height)),
+                _linesteps(_make_linesteps(width, height)),
                 _width(width),
                 _height(height) {}
 
@@ -47,9 +75,13 @@ namespace eva {
         std::size_t linestep()const noexcept{
             return _linesteps[INDEX];
         }
+
+        Cursor getPixel(std::size_t x, std::size_t y){
+            return Cursor(_planes);
+        }
     private:
-        std::array<Blob, PixelFormat::plane_number> _planes;
-        std::array<std::size_t, PixelFormat::plane_number> _linesteps;
+        PlaneArray _planes;
+        LinestepArray _linesteps;
         std::size_t _width;
         std::size_t _height;
     };

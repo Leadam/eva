@@ -10,3 +10,4 @@ TEST(Image, construct) {
     EXPECT_EQ(640, image.width());
     EXPECT_EQ(480, image.height());
 }
+
